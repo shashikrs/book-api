@@ -4,6 +4,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+//New user registration
 router.post("/register", checkUser, async (req, res) => {
   try {
     const salt = await bcrypt.genSalt();
@@ -21,6 +22,7 @@ router.post("/register", checkUser, async (req, res) => {
   }
 });
 
+//Login and return access token
 router.post("/login", checkUser, async (req, res) => {
   try {
     const user = await User.findOne({ username: req.body.username });
@@ -49,6 +51,7 @@ router.post("/login", checkUser, async (req, res) => {
   }
 });
 
+//middleware to validate login data
 async function checkUser(req, res, next) {
   if (!req.body.username)
     return res.status(400).json({ message: "Username not provided" });
