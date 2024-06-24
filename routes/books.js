@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Book = require("../models/book");
-const requestHandler = require("../middleware/middleware");
+const requestHandler = require("../middleware/request_handler");
+const auth = require("../middleware/auth");
 
 // POST /books - Add a new book
 router.post("/", async (req, res) => {
@@ -18,7 +19,7 @@ router.post("/", async (req, res) => {
 });
 
 // GET /books - Get all books
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
     const books = await Book.find();
     res.status(200).json(books);
@@ -28,12 +29,12 @@ router.get("/", async (req, res) => {
 });
 
 // GET /books/:id - Get a single book
-router.get("/:id", [requestHandler, getBook], async (req, res) => {
+router.get("/:id", [auth, requestHandler, getBook], async (req, res) => {
   res.json(res.book);
 });
 
 // PATCH /books/:id - Patch a single book
-router.patch("/:id", [requestHandler, getBook], async (req, res) => {
+router.patch("/:id", [auth, requestHandler, getBook], async (req, res) => {
   try {
     const updatedBook = await Book.updateOne(
       { _id: req.params.id },
@@ -46,7 +47,7 @@ router.patch("/:id", [requestHandler, getBook], async (req, res) => {
 });
 
 // PUT /books/:id - Update a single book
-router.put("/:id", [requestHandler, getBook], async (req, res) => {
+router.put("/:id", [auth, requestHandler, getBook], async (req, res) => {
   try {
     res.book._doc = { ...res.book._doc, ...req.body };
     const updatedBook = await res.book.save();
@@ -57,7 +58,7 @@ router.put("/:id", [requestHandler, getBook], async (req, res) => {
 });
 
 // DELETE /books/:id - Delete a single book
-router.delete("/:id", [requestHandler, getBook], async (req, res) => {
+router.delete("/:id", [auth, requestHandler, getBook], async (req, res) => {
   try {
     await res.book.deleteOne();
     res.status(204).json("Book deleted");

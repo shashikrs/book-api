@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const booksRouter = require("./routes/books");
+const usersRouter = require("./routes/users");
 
 //loads `.env` file contents into process.env
 dotenv.config();
@@ -20,6 +21,7 @@ mongoose
 app.use(express.json()); // to parse json bodies
 
 app.use("/books", booksRouter);
+app.use("/users", usersRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Books store!");

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+//middleware to valid id in requests
 const requestHandler = (req, res, next) => {
   if (req.params.id) {
     const validId = mongoose.isValidObjectId(req.params.id);
