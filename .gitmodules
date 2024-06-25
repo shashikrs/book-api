@@ -1,0 +1,3 @@
+[submodule "book-api-client"]
+	path = book-api-client
+	url = https://github.com/shashikrs/book-api-client.git
