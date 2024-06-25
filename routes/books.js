@@ -20,13 +20,13 @@ router.post("/", async (req, res) => {
 
 // GET /books - Get all books
 router.get("/", auth, async (req, res) => {
-  res.send("Just books");
-  // try {
-  //   const books = await Book.find();
-  //   res.status(200).json(books);
-  // } catch (err) {
-  //   res.status(404).json({ message: err.message });
-  // }
+  try {
+    console.log("called---------------------");
+    const books = await Book.find();
+    res.status(200).json(books);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
 });
 
 // GET /books/:id - Get a single book
