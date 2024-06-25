@@ -21,7 +21,6 @@ router.post("/", async (req, res) => {
 // GET /books - Get all books
 router.get("/", auth, async (req, res) => {
   try {
-    console.log("called---------------------");
     const books = await Book.find();
     res.status(200).json(books);
   } catch (err) {

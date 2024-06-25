@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const booksRouter = require("./routes/books");
 const usersRouter = require("./routes/users");
+const cors = require("cors");
 
 //loads `.env` file contents into process.env
 dotenv.config();
@@ -10,6 +11,16 @@ dotenv.config();
 //initialize
 const app = express();
 const port = process.env.PORT || 3000;
+
+//configure cors
+const corsOptions = {
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allow these HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Allow these headers
+  credentials: true, // Allow credentials
+  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+};
+
+app.use(cors(corsOptions));
 
 //connect to db
 mongoose
