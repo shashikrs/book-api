@@ -31,7 +31,13 @@ A simple express project showcasing REST APIs
 
 ## Usage
 
-To start the project, run:
+To start the project, run: (development)
+
+```sh
+npm run start-dev
+```
+
+To start the project, run: (production)
 
 ```sh
 npm start
