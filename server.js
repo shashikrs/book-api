@@ -14,6 +14,7 @@ const port = process.env.PORT || 3000;
 
 //configure cors
 const corsOptions = {
+  origin: true,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allow these HTTP methods
   allowedHeaders: ["Content-Type", "Authorization"], // Allow these headers
   credentials: true, // Allow credentials

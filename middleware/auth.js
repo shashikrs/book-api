@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const auth = async (req, res, next) => {
   const bearerToken = req.headers["authorization"];
 
-  if (!bearerToken) res.sendStatus(403);
+  if (bearerToken == undefined) return res.sendStatus(403);
 
   const token = bearerToken.split(" ")[1];
 

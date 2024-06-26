@@ -4,9 +4,10 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const validateEmail = require("../utils/validate_email");
+const auth = require("../middleware/auth");
 
 //New user registration
-router.post("/register", checkUser, async (req, res) => {
+router.post("/register", validateUser, async (req, res) => {
   try {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -24,7 +25,7 @@ router.post("/register", checkUser, async (req, res) => {
 });
 
 //Login and return access token
-router.post("/login", checkUser, async (req, res) => {
+router.post("/login", validateUser, async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
 
@@ -39,9 +40,9 @@ router.post("/login", checkUser, async (req, res) => {
         { email: user.email },
         process.env.JWT_SECRET
       );
-      res.json({ accessToken });
+      res.json({ email: user.email, accessToken });
     } else {
-      return res.status(400).json("Icorrect password");
+      return res.status(400).json("Incorrect password");
     }
   } catch (err) {
     if (err.status == 500) {
@@ -52,8 +53,30 @@ router.post("/login", checkUser, async (req, res) => {
   }
 });
 
+//Refresh access token
+router.post("/refresh-token", auth, async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (user == null) {
+      return res.status(404).json({
+        message: `User with email: ${req.body.email} not found`,
+      });
+    }
+
+    const accessToken = jwt.sign({ email: user.email }, process.env.JWT_SECRET);
+    res.json({ email: user.email, accessToken });
+  } catch (err) {
+    if (err.status == 500) {
+      res.status(500).json({ message: err.message });
+    } else {
+      res.status(400).json({ message: err.message });
+    }
+  }
+});
+
 //middleware to validate login data
-async function checkUser(req, res, next) {
+async function validateUser(req, res, next) {
   if (!req.body.email)
     return res.status(400).json({ message: "Email not provided" });
   if (!validateEmail(req.body.email))
