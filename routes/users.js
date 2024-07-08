@@ -6,7 +6,53 @@ const jwt = require("jsonwebtoken");
 const validateEmail = require("../utils/validate_email");
 const auth = require("../middleware/auth");
 
-//New user registration
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: The auto-generated ID of the user
+ *         email:
+ *           type: string
+ *           description: The email of the user
+ *         password:
+ *           type: string
+ *           description: The password of the user
+ *       example:
+ *         id: d5fE_asz
+ *         email: user@example.com
+ *         password: yourpassword
+ */
+
+/**
+ * @swagger
+ * /api/v1/users/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/register", validateUser, async (req, res) => {
   try {
     const salt = await bcrypt.genSalt();
@@ -24,7 +70,40 @@ router.post("/register", validateUser, async (req, res) => {
   }
 });
 
-//Login and return access token
+/**
+ * @swagger
+ * /api/v1/users/login:
+ *   post:
+ *     summary: Login and return access token
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 email:
+ *                   type: string
+ *                   description: The email of the user
+ *                 accessToken:
+ *                   type: string
+ *                   description: The JWT access token
+ *               example:
+ *                 email: user@example.com
+ *                 accessToken: youraccesstoken
+ *       400:
+ *         description: Incorrect password
+ *       404:
+ *         description: User not found
+ */
 router.post("/login", validateUser, async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
@@ -53,7 +132,36 @@ router.post("/login", validateUser, async (req, res) => {
   }
 });
 
-//Refresh access token
+/**
+ * @swagger
+ * /api/v1/users/refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Access token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 email:
+ *                   type: string
+ *                   description: The email of the user
+ *                 accessToken:
+ *                   type: string
+ *                   description: The JWT access token
+ *               example:
+ *                 email: user@example.com
+ *                 accessToken: yournewaccesstoken
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 router.post("/refresh-token", auth, async (req, res) => {
   try {
     const user = req.user;

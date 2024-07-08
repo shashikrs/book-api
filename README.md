@@ -43,7 +43,9 @@ To start the project, run: (production)
 npm start
 ```
 
-Open your browser and go to `http://localhost:3000`.
+Open your browser and go to `http://localhost:3000/api/v1`.
+
+For swagger docs go to `http://localhost:3000/api-docs`.
 
 ## Features
 
@@ -54,7 +56,7 @@ Open your browser and go to `http://localhost:3000`.
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request.
+Contributions are welcome! Please open an issue.
 
 ## License
 

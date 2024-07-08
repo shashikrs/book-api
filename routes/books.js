@@ -4,7 +4,61 @@ const Book = require("../models/book");
 const requestHandler = require("../middleware/request_handler");
 const auth = require("../middleware/auth");
 
-// POST /books - Add a new book
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *    bearerAuth:
+ *     type: http
+ *     scheme: bearer
+ *   security:
+ *     - bearerAuth: []
+ *   schemas:
+ *     Book:
+ *       type: object
+ *       required:
+ *         - title
+ *         - author
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: The auto-generated ID of the book
+ *         title:
+ *           type: string
+ *           description: The title of the book
+ *         author:
+ *           type: string
+ *           description: The author of the book
+ *       example:
+ *         id: d5fE_asz
+ *         title: The Great Gatsby
+ *         author: F. Scott Fitzgerald
+ */
+
+/**
+ * @swagger
+ * /api/v1/books:
+ *   post:
+ *     summary: Add a new book
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Book'
+ *     responses:
+ *       201:
+ *         description: Book created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/", auth, async (req, res) => {
   try {
     const book = new Book({
@@ -18,7 +72,26 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-// GET /books - Get all books
+/**
+ * @swagger
+ * /api/v1/books:
+ *   get:
+ *     summary: Get all books
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of books
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Book'
+ *       404:
+ *         description: Books not found
+ */
 router.get("/", auth, async (req, res) => {
   try {
     const books = await Book.find();
@@ -28,12 +101,66 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// GET /books/:id - Get a single book
+/**
+ * @swagger
+ * /api/v1/books/{id}:
+ *   get:
+ *     summary: Get a single book
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The book ID
+ *     responses:
+ *       200:
+ *         description: A single book
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       404:
+ *         description: Book not found
+ */
 router.get("/:id", [auth, requestHandler, getBook], async (req, res) => {
   res.json(res.book);
 });
 
-// PATCH /books/:id - Patch a single book
+/**
+ * @swagger
+ * /api/v1/books/{id}:
+ *   patch:
+ *     summary: Patch a single book
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The book ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Book'
+ *     responses:
+ *       200:
+ *         description: Book patched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       500:
+ *         description: Server error
+ */
 router.patch("/:id", [auth, requestHandler, getBook], async (req, res) => {
   try {
     const updatedBook = await Book.updateOne(
@@ -46,7 +173,37 @@ router.patch("/:id", [auth, requestHandler, getBook], async (req, res) => {
   }
 });
 
-// PUT /books/:id - Update a single book
+/**
+ * @swagger
+ * /api/v1/books/{id}:
+ *   put:
+ *     summary: Update a single book
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The book ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Book'
+ *     responses:
+ *       200:
+ *         description: Book updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       500:
+ *         description: Server error
+ */
 router.put("/:id", [auth, requestHandler, getBook], async (req, res) => {
   try {
     res.book._doc = { ...res.book._doc, ...req.body };
@@ -57,7 +214,27 @@ router.put("/:id", [auth, requestHandler, getBook], async (req, res) => {
   }
 });
 
-// DELETE /books/:id - Delete a single book
+/**
+ * @swagger
+ * /api/v1/books/{id}:
+ *   delete:
+ *     summary: Delete a single book
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The book ID
+ *     responses:
+ *       204:
+ *         description: Book deleted successfully
+ *       500:
+ *         description: Server error
+ */
 router.delete("/:id", [auth, requestHandler, getBook], async (req, res) => {
   try {
     await res.book.deleteOne();
@@ -68,7 +245,7 @@ router.delete("/:id", [auth, requestHandler, getBook], async (req, res) => {
   }
 });
 
-//middleware to get book by id
+// Middleware to get book by id
 async function getBook(req, res, next) {
   let book;
   try {
