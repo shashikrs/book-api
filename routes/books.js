@@ -5,7 +5,7 @@ const requestHandler = require("../middleware/request_handler");
 const auth = require("../middleware/auth");
 
 // POST /books - Add a new book
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     const book = new Book({
       title: req.body.title,
