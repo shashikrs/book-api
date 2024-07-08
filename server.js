@@ -38,13 +38,14 @@ const swaggerOptions = {
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Serve static files from the 'public' directory
+app.use(express.static("public"));
+
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerDocs, {
-    customCss:
-      ".swagger-ui .opblock .opblock-summary-path-description-wrapper { align-items: center; display: flex; flex-wrap: wrap; gap: 0 10px; padding: 0 10px; width: 100%; }",
     customCssUrl: CSS_URL,
   })
 );
