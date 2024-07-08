@@ -12,6 +12,10 @@ const versionPath = "/api/v1";
 //loads `.env` file contents into process.env
 dotenv.config();
 
+//cdn CSS
+const CSS_URL =
+  "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
+
 // Swagger setup
 const swaggerOptions = {
   swaggerDefinition: {
@@ -35,7 +39,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use("/api-docs/", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocs, { customCssUrl: CSS_URL })
+);
 
 //configure cors
 const corsOptions = {
