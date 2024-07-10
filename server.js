@@ -16,7 +16,7 @@ dotenv.config();
 const CSS_URL =
   "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
 
-// Swagger setup
+//swagger setup
 const swaggerOptions = {
   swaggerDefinition: {
     openapi: "3.0.0",
@@ -38,7 +38,7 @@ const swaggerOptions = {
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static files from the 'public' directory
+//serve static files from the 'public' directory
 app.use(express.static("public"));
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
@@ -63,10 +63,10 @@ app.use(
 //configure cors
 const corsOptions = {
   origin: true,
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allow these HTTP methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Allow these headers
-  credentials: true, // Allow credentials
-  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -78,18 +78,18 @@ mongoose
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
 //middleware
-app.use(express.json()); // to parse json bodies
+app.use(express.json());
 
-// Versioned routes
+//versioned routes
 const v1Router = express.Router();
 v1Router.get("/", (req, res) => {
   res.send("Welcome to Books Store API version 1");
 });
 
-// Register versioned routes
+//register versioned routes
 app.use(versionPath, v1Router);
 
-// APIs
+//APIs
 app.use(`${versionPath}/books`, booksRouter);
 app.use(`${versionPath}/users`, usersRouter);
 

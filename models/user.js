@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validateEmail = require("../utils/validate_email");
+const { ROLES } = require("../config/constants");
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -9,6 +10,11 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
   password: { type: String, required: true },
+  role: {
+    type: String,
+    enum: [ROLES.ADMIN, ROLES.USER],
+    default: ROLES.USER,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

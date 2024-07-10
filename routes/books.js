@@ -3,6 +3,7 @@ const router = express.Router();
 const Book = require("../models/book");
 const requestHandler = require("../middleware/request_handler");
 const auth = require("../middleware/auth");
+const { ROLES, MESSAGES } = require("../config/constants");
 
 /**
  * @swagger
@@ -64,6 +65,7 @@ router.post("/", auth, async (req, res) => {
     const book = new Book({
       title: req.body.title,
       author: req.body.author,
+      owner: req.user._id,
     });
     const newBook = await book.save();
     res.status(201).json(newBook);
@@ -94,7 +96,13 @@ router.post("/", auth, async (req, res) => {
  */
 router.get("/", auth, async (req, res) => {
   try {
-    const books = await Book.find();
+    let books = [];
+    if (req.user.role != ROLES.ADMIN) {
+      books = await Book.find({ owner: req.user._id });
+    } else {
+      books = await Book.find();
+    }
+
     res.status(200).json(books);
   } catch (err) {
     res.status(404).json({ message: err.message });
@@ -126,8 +134,9 @@ router.get("/", auth, async (req, res) => {
  *       404:
  *         description: Book not found
  */
-router.get("/:id", [auth, requestHandler, getBook], async (req, res) => {
-  res.json(res.book);
+router.get("/:id", [auth, requestHandler, checkOwnership], async (req, res) => {
+  const book = await getBook(req, res);
+  res.json(book);
 });
 
 /**
@@ -161,17 +170,25 @@ router.get("/:id", [auth, requestHandler, getBook], async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.patch("/:id", [auth, requestHandler, getBook], async (req, res) => {
-  try {
-    const updatedBook = await Book.updateOne(
-      { _id: req.params.id },
-      { $set: req.body }
-    );
-    res.json(res.book);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+router.patch(
+  "/:id",
+  [auth, requestHandler, checkOwnership],
+  async (req, res) => {
+    try {
+      const updatedBook = await Book.updateOne(
+        { _id: req.params.id },
+        { $set: req.body }
+      );
+
+      const book = await getBook(req, res);
+
+      console.log(book);
+      res.json(res.book);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   }
-});
+);
 
 /**
  * @swagger
@@ -204,9 +221,10 @@ router.patch("/:id", [auth, requestHandler, getBook], async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.put("/:id", [auth, requestHandler, getBook], async (req, res) => {
+router.put("/:id", [auth, requestHandler, checkOwnership], async (req, res) => {
   try {
-    res.book._doc = { ...res.book._doc, ...req.body };
+    let book = await getBook(req, res);
+    book = { ...book, ...req.body };
     const updatedBook = await res.book.save();
     res.json(updatedBook);
   } catch (err) {
@@ -235,29 +253,50 @@ router.put("/:id", [auth, requestHandler, getBook], async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.delete("/:id", [auth, requestHandler, getBook], async (req, res) => {
-  try {
-    await res.book.deleteOne();
-    res.status(204).json("Book deleted");
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Book not deleted" });
+router.delete(
+  "/:id",
+  [auth, requestHandler, checkOwnership],
+  async (req, res) => {
+    try {
+      const book = await getBook(req, res);
+      await book.deleteOne();
+      return res.status(204).json(MESSAGES.BOOK_DELETED);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: MESSAGES.BOOK_NOT_DELETED });
+    }
   }
-});
+);
 
-// Middleware to get book by id
-async function getBook(req, res, next) {
+//middleware to get book by id
+async function getBook(req, res) {
   let book;
   try {
     book = await Book.findById(req.params.id);
-    if (book == null) {
-      return res.status(404).json({ message: "Book not found" });
+    if (!book) {
+      return res.status(404).json({ message: MESSAGES.BOOK_NOT_FOUND });
     }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: err.message });
+  }
+  return book;
+}
+
+//middleware to check if the user owns the book
+async function checkOwnership(req, res, next) {
+  try {
+    const book = await getBook(req, res);
+    if (
+      req.user.role !== ROLES.ADMIN &&
+      book.owner.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({ message: MESSAGES.ACCESS_DENIED });
+    }
+    next();
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
-  res.book = book;
-  next();
 }
 
 module.exports = router;
